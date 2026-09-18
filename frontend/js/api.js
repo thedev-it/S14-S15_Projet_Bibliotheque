@@ -2,8 +2,7 @@
    Bibliothèque de quartier — Client API
    Centralise tous les appels fetch() vers le backend Express.
    ============================================================ */
-
-const API_BASE_URL = "https://bibliotheque-api.onrender.com/api"; // Remplace par ton URL exacte
+const API_BASE_URL = "https://bibliotheque-api-36x7.onrender.com/api"; // Remplace par ton URL exacte
 
 /**
  * Effectue une requête HTTP vers l'API et gère les erreurs de façon
