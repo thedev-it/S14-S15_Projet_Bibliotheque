@@ -1,28 +1,47 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+// Configuration dynamique : Render (DATABASE_URL) vs Développement local
+const poolConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false, // Obligatoire pour la connexion sécurisée sur Render
+      },
+    }
+  : {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      database: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+    };
+
+const pool = new Pool(poolConfig);
+
+// Gestion des erreurs inattendues sur les connexions inactives
+pool.on("error", (err) => {
+  console.error("Erreur inattendue sur le client PostgreSQL :", err);
 });
 
 const connectDB = async () => {
-    try {
-      const client = await pool.connect();
-      const res = await client.query("SELECT NOW()");
-      console.log(
-        `PostgresSQL is connected : ${process.env.DB_NAME} on ${process.env.DB_HOST} (${res.rows[0].now})`,
-      );
+  try {
+    const client = await pool.connect();
+    const res = await client.query("SELECT NOW()");
 
-      client.release();
-    } catch (e) {
-      console.error("PostgreSQL connection error:", e);
-      process.exit(1);
-    }
-    
-}
+    const dbInfo = process.env.DATABASE_URL
+      ? "Render Cloud"
+      : `${process.env.DB_NAME} sur ${process.env.DB_HOST}`;
+
+    console.log(
+      `PostgreSQL connecté avec succès (${dbInfo}) à : ${res.rows[0].now}`,
+    );
+
+    client.release();
+  } catch (e) {
+    console.error("Erreur de connexion à PostgreSQL :", e.message);
+    process.exit(1);
+  }
+};
 
 module.exports = { pool, connectDB };
