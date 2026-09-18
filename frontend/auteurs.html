@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auteurs — Bibliothèque de quartier</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="auteurs">
+  <div class="app">
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <h1>Auteurs</h1>
+          <p>Consulter, ajouter, modifier ou supprimer un auteur.</p>
+        </div>
+      </div>
+
+      <div id="alert-zone"></div>
+
+      <section class="form-panel">
+        <h2 id="form-title">Ajouter un auteur</h2>
+        <form id="auteur-form">
+          <input type="hidden" id="auteur-id" value="" />
+          <div class="field">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" required />
+          </div>
+          <div class="field">
+            <label for="nationalite">Nationalité</label>
+            <input type="text" id="nationalite" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn" id="submit-btn">Ajouter</button>
+            <button type="button" class="btn secondary" id="cancel-edit-btn" hidden>Annuler</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Nationalité</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="auteurs-tbody">
+            <tr><td colspan="3" class="empty-state">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal de confirmation personnalisé -->
+  <div id="confirm-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3>Confirmation</h3>
+      <p id="confirm-message">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+      <div class="modal-actions">
+        <button id="confirm-btn-cancel" class="btn secondary small">Annuler</button>
+        <button id="confirm-btn-danger" class="btn small">Confirmer</button>
+      </div>
+    </div>
+  </div>
+ <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+ 
+  <script src="js/auteurs.js"></script>
+</body>
+</html>

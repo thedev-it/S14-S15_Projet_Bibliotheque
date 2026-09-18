@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adhérents — Bibliothèque de quartier</title>
+  <link rel="stylesheet" href="css/style.css?v=2" />
+</head>
+<body data-page="adherents">
+  <div class="app">
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <h1>Adhérents</h1>
+          <p>Consulter, ajouter, modifier ou supprimer un adhérent.</p>
+        </div>
+      </div>
+
+      <div id="alert-zone"></div>
+
+      <section class="form-panel">
+        <h2 id="form-title">Ajouter un adhérent</h2>
+        <form id="adherent-form">
+          <input type="hidden" id="adherent-id" value="" />
+          <div class="field">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" required />
+          </div>
+          <div class="field">
+            <label for="contact">Contact (email ou téléphone)</label>
+            <input type="text" id="contact" required />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn" id="submit-btn">Ajouter</button>
+            <button type="button" class="btn secondary" id="cancel-edit-btn" hidden>Annuler</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Contact</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="adherents-tbody">
+            <tr><td colspan="3" class="empty-state">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Panneau d'historique des emprunts d'un adhérent, masqué par défaut -->
+      <section class="form-panel" id="historique-panel" style="max-width: 100%; margin-top: 28px;" hidden>
+        <h2 id="historique-title">Historique des emprunts</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Livre</th>
+                <th>Date d'emprunt</th>
+                <th>Date de retour prévue</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody id="historique-tbody"></tbody>
+          </table>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn secondary" id="close-historique-btn">Fermer l'historique</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Inclure avant les balises script dans adherents.html -->
+  <div id="confirm-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3>Confirmation</h3>
+      <p id="confirm-message">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+      <div class="modal-actions">
+        <button id="confirm-btn-cancel" class="btn secondary small">Annuler</button>
+        <button id="confirm-btn-danger" class="btn small">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js?v=2"></script>
+  <script src="js/nav.js?v=2"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/adherents.js?v=2"></script>
+</body>
+</html>
+
+  <script src="js/api.js?v=2"></script>
+  <script src="js/nav.js?v=2"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/adherents.js?v=2"></script>
+</body>
+</html>

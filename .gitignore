@@ -1,0 +1,12 @@
+# Dépendances Node.js (très lourd, ne doit JAMAIS être sur GitHub)
+node_modules/
+
+# Fichiers de variables d'environnement (contient tes mots de passe/clés secrets)
+.env
+.env.local
+
+# Fichiers de logs et temporaires
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emprunts — Bibliothèque de quartier</title>
+  <link rel="stylesheet" href="css/style.css?v=2" />
+</head>
+<body data-page="emprunts">
+  <div class="app">
+    <div id="sidebar-placeholder"></div>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <h1>Emprunts</h1>
+          <p>Enregistrer un emprunt, un retour, et suivre les retards.</p>
+        </div>
+      </div>
+
+      <div id="alert-zone"></div>
+
+      <section class="form-panel">
+        <h2>Nouvel emprunt</h2>
+        <form id="emprunt-form">
+          <div class="field">
+            <label for="livre_id">Livre (disponibles uniquement)</label>
+            <select id="livre_id" required>
+              <option value="">— Sélectionner un livre —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="adherent_id">Adhérent</label>
+            <select id="adherent_id" required>
+              <option value="">— Sélectionner un adhérent —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="date_retour_prevue">Date de retour prévue</label>
+            <input type="date" id="date_retour_prevue" required />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn" id="submit-btn">Enregistrer l'emprunt</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="toolbar" style="display: flex; justify: space-between; align-items: center;">
+        <div>
+          <button type="button" class="btn small" id="filter-en-cours" data-filter="en-cours">En cours</button>
+          <button type="button" class="btn secondary small" id="filter-en-retard" data-filter="en-retard">En retard</button>
+          <button type="button" class="btn secondary small" id="filter-tous" data-filter="tous">Tous</button>
+        </div>
+        <!-- Bouton d'exportation CSV -->
+        <button type="button" class="btn secondary small" id="btn-export-csv">
+          📥 Exporter retards (CSV)
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Livre</th>
+              <th>Adhérent</th>
+              <th>Date d'emprunt</th>
+              <th>Retour prévu</th>
+              <th>Statut</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="emprunts-tbody">
+            <tr><td colspan="6" class="empty-state">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal de confirmation personnalisé -->
+  <div id="confirm-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3>Confirmation</h3>
+      <p id="confirm-message">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+      <div class="modal-actions">
+        <button id="confirm-btn-cancel" class="btn secondary small">Annuler</button>
+        <button id="confirm-btn-danger" class="btn small">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js?v=2"></script>
+  <script src="js/nav.js?v=2"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/emprunts.js?v=2"></script>
+</body>
+</html>
