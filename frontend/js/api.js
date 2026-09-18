@@ -3,7 +3,7 @@
    Centralise tous les appels fetch() vers le backend Express.
    ============================================================ */
 
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "https://bibliotheque-api.onrender.com/api"; // Remplace par ton URL exacte
 
 /**
  * Effectue une requête HTTP vers l'API et gère les erreurs de façon
