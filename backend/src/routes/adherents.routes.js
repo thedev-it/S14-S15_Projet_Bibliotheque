@@ -8,12 +8,16 @@ const {
   updateAdherent,
   deleteAdherent,
 } = require("../controllers/adherents.controller");
+const {
+  validateAdherent,
+  validateUuidParam,
+} = require("../middlewares/validate.middleware");
 
 router.get("/", getAdherents);
-router.get("/:id", getAdherentById);
-router.get("/:id/emprunts", getAdherentEmprunts);
-router.post("/", createAdherent);
-router.put("/:id", updateAdherent);
-router.delete("/:id", deleteAdherent);
+router.get("/:id", validateUuidParam(), getAdherentById);
+router.get("/:id/emprunts", validateUuidParam(), getAdherentEmprunts);
+router.post("/", validateAdherent, createAdherent);
+router.put("/:id", validateUuidParam(), validateAdherent, updateAdherent);
+router.delete("/:id", validateUuidParam(), deleteAdherent);
 
 module.exports = router;

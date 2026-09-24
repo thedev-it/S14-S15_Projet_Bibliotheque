@@ -7,6 +7,7 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Nettoyage (utile pour recréer les tables depuis zéro)
+-- ATTENTION : ces commandes suppriment toutes les données existantes.
 DROP TABLE IF EXISTS emprunts CASCADE;
 DROP TABLE IF EXISTS livres CASCADE;
 DROP TABLE IF EXISTS adherents CASCADE;
@@ -65,14 +66,26 @@ CREATE INDEX idx_emprunts_adherent_id ON emprunts(adherent_id);
 -- Index utile pour retrouver rapidement les emprunts en cours / en retard
 CREATE INDEX idx_emprunts_en_cours ON emprunts(date_retour_prevue) WHERE date_retour_reelle IS NULL;
 
+-- Garantit au niveau de la base qu'un livre n'a qu'un seul emprunt en cours
+-- (filet de sécurité en complément du SELECT ... FOR UPDATE de l'application)
+CREATE UNIQUE INDEX uniq_emprunt_en_cours
+    ON emprunts (livre_id) WHERE date_retour_reelle IS NULL;
+
 -- ============================================================
 -- Notes de modélisation
 -- ============================================================
 -- - Le statut de disponibilité d'un livre est stocké en dur sur
 --   la table `livres` (colonne `statut`), plutôt que calculé.
---   La cohérence est garantie par la logique métier applicative :
+--   La cohérence est garantie par la logique métier applicative,
+--   exécutée dans une transaction :
 --     * à la création d'un emprunt -> statut = 'emprunte'
 --     * au retour d'un livre       -> statut = 'disponible'
+-- - Concurrence : la transaction verrouille la ligne du livre
+--   (SELECT ... FOR UPDATE), donc deux emprunts simultanés du même
+--   livre sont sérialisés : le second reçoit un 409 (conflit).
+--   L'index unique partiel `uniq_emprunt_en_cours` garantit en plus,
+--   côté base, qu'il ne peut exister qu'un seul emprunt en cours
+--   par livre (violation -> erreur PostgreSQL 23505 -> 409).
 -- - Le retard n'est pas stocké : il se déduit à la volée via
 --   (date_retour_prevue < CURRENT_DATE AND date_retour_reelle IS NULL).
 -- - Suppression RESTRICT sur les FK : on empêche de supprimer un

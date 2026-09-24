@@ -1,4 +1,5 @@
 const { pool } = require("../config/db");
+const AppError = require("../utils/AppError");
 
 // GET /api/adherents
 const getAdherents = async (req, res, next) => {
@@ -19,9 +20,7 @@ const getAdherentById = async (req, res, next) => {
     ]);
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Adhérent introuvable" });
+      throw new AppError("Adhérent introuvable", 404);
     }
 
     res.json(result.rows[0]);
@@ -39,9 +38,7 @@ const getAdherentEmprunts = async (req, res, next) => {
       id,
     ]);
     if (adherent.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Adhérent introuvable" });
+      throw new AppError("Adhérent introuvable", 404);
     }
 
     const result = await pool.query(
@@ -64,15 +61,6 @@ const createAdherent = async (req, res, next) => {
   try {
     const { nom, contact } = req.body;
 
-    if (!nom || !contact) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Le nom et le contact sont obligatoires",
-        });
-    }
-
     const result = await pool.query(
       "INSERT INTO adherents (nom, contact) VALUES ($1, $2) RETURNING *",
       [nom, contact],
@@ -90,24 +78,13 @@ const updateAdherent = async (req, res, next) => {
     const { id } = req.params;
     const { nom, contact } = req.body;
 
-    if (!nom || !contact) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Le nom et le contact sont obligatoires",
-        });
-    }
-
     const result = await pool.query(
       "UPDATE adherents SET nom = $1, contact = $2 WHERE id = $3 RETURNING *",
       [nom, contact, id],
     );
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Adhérent introuvable" });
+      throw new AppError("Adhérent introuvable", 404);
     }
 
     res.json(result.rows[0]);
@@ -126,9 +103,7 @@ const deleteAdherent = async (req, res, next) => {
     );
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Adhérent introuvable" });
+      throw new AppError("Adhérent introuvable", 404);
     }
 
     res.json({ success: true, message: "Adhérent supprimé" });

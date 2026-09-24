@@ -1,4 +1,5 @@
 const { pool } = require("../config/db");
+const AppError = require("../utils/AppError");
 
 // GET /api/auteurs
 const getAuteurs = async (req, res, next) => {
@@ -19,9 +20,7 @@ const getAuteurById = async (req, res, next) => {
     ]);
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Auteur introuvable" });
+      throw new AppError("Auteur introuvable", 404);
     }
 
     res.json(result.rows[0]);
@@ -31,15 +30,10 @@ const getAuteurById = async (req, res, next) => {
 };
 
 // POST /api/auteurs
+// Le body a déjà été validé par le middleware validateAuteur avant d'arriver ici.
 const createAuteur = async (req, res, next) => {
   try {
     const { nom, nationalite } = req.body;
-
-    if (!nom) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Le nom est obligatoire" });
-    }
 
     const result = await pool.query(
       "INSERT INTO auteurs (nom, nationalite) VALUES ($1, $2) RETURNING *",
@@ -58,21 +52,13 @@ const updateAuteur = async (req, res, next) => {
     const { id } = req.params;
     const { nom, nationalite } = req.body;
 
-    if (!nom) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Le nom est obligatoire" });
-    }
-
     const result = await pool.query(
       "UPDATE auteurs SET nom = $1, nationalite = $2 WHERE id = $3 RETURNING *",
       [nom, nationalite || null, id],
     );
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Auteur introuvable" });
+      throw new AppError("Auteur introuvable", 404);
     }
 
     res.json(result.rows[0]);
@@ -91,9 +77,7 @@ const deleteAuteur = async (req, res, next) => {
     );
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Auteur introuvable" });
+      throw new AppError("Auteur introuvable", 404);
     }
 
     res.json({ success: true, message: "Auteur supprimé" });

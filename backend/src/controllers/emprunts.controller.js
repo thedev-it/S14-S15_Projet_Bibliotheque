@@ -1,4 +1,5 @@
 const { pool } = require("../config/db");
+const AppError = require("../utils/AppError");
 
 // GET /api/emprunts
 const getEmprunts = async (req, res, next) => {
@@ -57,53 +58,35 @@ const createEmprunt = async (req, res, next) => {
   try {
     const { livre_id, adherent_id, date_retour_prevue } = req.body;
 
-    if (!livre_id || !adherent_id || !date_retour_prevue) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "livre_id, adherent_id et date_retour_prevue sont obligatoires",
-      });
-    }
-
     await client.query("BEGIN");
 
-    // Vérifie que le livre existe et est disponible
-    const livre = await client.query("SELECT * FROM livres WHERE id = $1", [
-      livre_id,
-    ]);
+
+    const livre = await client.query(
+      "SELECT * FROM livres WHERE id = $1 FOR UPDATE",
+      [livre_id],
+    );
+
     if (livre.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return res
-        .status(404)
-        .json({ success: false, message: "Livre introuvable" });
+      throw new AppError("Livre introuvable", 404);
     }
     if (livre.rows[0].statut === "emprunte") {
-      await client.query("ROLLBACK");
-      return res
-        .status(400)
-        .json({ success: false, message: "Ce livre est déjà emprunté" });
+      throw new AppError("Ce livre est déjà emprunté", 409);
     }
 
-    // Vérifie que l'adhérent existe
     const adherent = await client.query(
       "SELECT id FROM adherents WHERE id = $1",
       [adherent_id],
     );
     if (adherent.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return res
-        .status(404)
-        .json({ success: false, message: "Adhérent introuvable" });
+      throw new AppError("Adhérent introuvable", 404);
     }
 
-    // Crée l'emprunt
     const emprunt = await client.query(
       `INSERT INTO emprunts (livre_id, adherent_id, date_retour_prevue)
        VALUES ($1, $2, $3) RETURNING *`,
       [livre_id, adherent_id, date_retour_prevue],
     );
 
-    // Passe le livre en "emprunte"
     await client.query(`UPDATE livres SET statut = 'emprunte' WHERE id = $1`, [
       livre_id,
     ]);
@@ -127,20 +110,17 @@ const retournerEmprunt = async (req, res, next) => {
 
     await client.query("BEGIN");
 
-    const emprunt = await client.query("SELECT * FROM emprunts WHERE id = $1", [
-      id,
-    ]);
+   
+    const emprunt = await client.query(
+      "SELECT * FROM emprunts WHERE id = $1 FOR UPDATE",
+      [id],
+    );
+
     if (emprunt.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return res
-        .status(404)
-        .json({ success: false, message: "Emprunt introuvable" });
+      throw new AppError("Emprunt introuvable", 404);
     }
     if (emprunt.rows[0].date_retour_reelle !== null) {
-      await client.query("ROLLBACK");
-      return res
-        .status(400)
-        .json({ success: false, message: "Ce livre a déjà été rendu" });
+      throw new AppError("Ce livre a déjà été rendu", 409);
     }
 
     const updated = await client.query(
@@ -164,49 +144,10 @@ const retournerEmprunt = async (req, res, next) => {
   }
 };
 
-// GET /api/emprunts/export-retards-csv
-const exportRetardsCSV = async (req, res, next) => {
-  try {
-    const query = `
-      SELECT e.id, l.titre, a.nom AS adherent, e.date_emprunt, e.date_retour_prevue
-      FROM emprunts e
-      JOIN livres l ON e.livre_id = l.id
-      JOIN adherents a ON e.adherent_id = a.id
-      WHERE e.date_retour_reelle IS NULL AND e.date_retour_prevue < CURRENT_DATE
-      ORDER BY e.date_retour_prevue ASC
-    `;
-    // Correction : pool.query au lieu de db.query
-    const { rows } = await pool.query(query);
-
-    // Formate les en-têtes et le contenu du CSV
-    let csv =
-      "ID Emprunt;Titre Livre;Adherent;Date Emprunt;Date Retour Prevue\n";
-    rows.forEach((r) => {
-      const dateEmprunt = r.date_emprunt
-        ? new Date(r.date_emprunt).toLocaleDateString("fr-FR")
-        : "";
-      const datePrevue = r.date_retour_prevue
-        ? new Date(r.date_retour_prevue).toLocaleDateString("fr-FR")
-        : "";
-      csv += `"${r.id}";"${r.titre}";"${r.adherent}";"${dateEmprunt}";"${datePrevue}"\n`;
-    });
-
-    res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader(
-      "Content-Disposition",
-      'attachment; filename="emprunts_en_retard.csv"',
-    );
-    return res.status(200).send(csv);
-  } catch (err) {
-    next(err);
-  }
-};
-
 module.exports = {
   getEmprunts,
   getEmpruntsEnCours,
   getEmpruntsEnRetard,
   createEmprunt,
   retournerEmprunt,
-  exportRetardsCSV,
 };
